@@ -22,22 +22,6 @@ export default async function StatsPage() {
     .from(writeups);
   const charsWritten = totalChars[0]?.sum ?? 0;
 
-  const dates = await db
-    .select({ createdAt: writeups.createdAt })
-    .from(writeups)
-    .orderBy(sql`created_at asc`);
-
-  const firstDate = dates[0]?.createdAt ?? null;
-  const lastDate = dates[dates.length - 1]?.createdAt ?? null;
-
-  const monthlyMap = new Map<string, number>();
-  for (const d of dates) {
-    const key = d.createdAt.slice(0, 7);
-    monthlyMap.set(key, (monthlyMap.get(key) ?? 0) + 1);
-  }
-  const monthlyRows = [...monthlyMap.entries()].sort(([a], [b]) => a.localeCompare(b));
-  const maxMonthly = Math.max(...monthlyRows.map(([, c]) => c), 1);
-
   const avgDifficultyScore = await db
     .select({
       avg: sql<number>`coalesce(avg(CASE difficulty WHEN 'easy' THEN 1 WHEN 'medium' THEN 2 WHEN 'hard' THEN 3 WHEN 'insane' THEN 4 END), 0)`,
@@ -67,11 +51,6 @@ export default async function StatsPage() {
 
   const diffLabel =
     avgDiff < 1.5 ? "easy" : avgDiff < 2.5 ? "medium" : avgDiff < 3.5 ? "hard" : "insane";
-
-  const mostActive = monthlyRows.reduce(
-    (best, [m, c]) => (c > (best?.count ?? 0) ? { month: m, count: c } : best),
-    null as { month: string; count: number } | null,
-  );
 
   return (
     <div>
@@ -137,34 +116,7 @@ export default async function StatsPage() {
         )}
       </div>
 
-      <div className="mb-8">
-        <h2 className="mb-3 text-xs text-muted-foreground">$ cat timeline/</h2>
-        {monthlyRows.length === 0 ? (
-          <p className="text-xs text-muted-foreground">no data yet</p>
-        ) : (
-          <div className="space-y-1">
-            {monthlyRows.map(([month, count]) => (
-              <div key={month} className="flex items-center gap-3">
-                <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">{month}</span>
-                <span className="text-xs text-foreground">{asciiBar(count, maxMonthly)}</span>
-                <span className="w-8 shrink-0 text-xs text-muted-foreground">{count}</span>
-              </div>
-            ))}
-          </div>
-        )}
-        {mostActive && (
-          <p className="mt-2 text-xs text-muted-foreground">
-            most active month: {mostActive.month} ({mostActive.count} writeups)
-          </p>
-        )}
-        {firstDate && lastDate && (
-          <p className="text-xs text-muted-foreground">
-            active: {new Date(firstDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-            {" \u2014 "}
-            {new Date(lastDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-          </p>
-        )}
-      </div>
+
 
       <div>
         <h2 className="mb-3 text-xs text-muted-foreground">$ cat ctfs/</h2>
@@ -179,7 +131,7 @@ export default async function StatsPage() {
                 className="border border-border bg-card px-3 py-1.5 text-xs hover:border-primary transition-none"
               >
                 <span>{ctf}</span>
-                <span className="ml-2 text-muted-foreground">{count}</span>
+                <span className="ml-2 text-muted-foreground"> {count}</span>
               </Link>
             ))
           )}
