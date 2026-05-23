@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { writeups } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
 
 export async function GET(
   _request: Request,
@@ -25,6 +26,11 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { slug } = await params;
   const body = await request.json();
 
@@ -46,7 +52,7 @@ export async function PUT(
       ctf: body.ctf ?? existing.ctf,
       category: body.category ?? existing.category,
       difficulty: body.difficulty ?? existing.difficulty,
-      tags: body.tags ? JSON.stringify(body.tags) : existing.tags,
+      tags: body.tags ? JSON.stringify(body.tags) : "[]",
       content: body.content ?? existing.content,
       submittedBy: body.submittedBy ?? existing.submittedBy,
     })
@@ -59,6 +65,11 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { slug } = await params;
   await db.delete(writeups).where(eq(writeups.id, slug));
   return NextResponse.json({ deleted: true });

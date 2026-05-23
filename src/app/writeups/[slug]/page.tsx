@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/db";
 import { writeups } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { WriteupActions } from "@/components/writeup-actions";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -43,6 +44,8 @@ export default async function WriteupPage({
     .get();
 
   if (!writeup) notFound();
+
+  const session = await auth();
 
   let tags: string[] = [];
   try {
@@ -105,13 +108,12 @@ export default async function WriteupPage({
               ))}
             </div>
           )}
+          <WriteupActions slug={writeup.id} isOwner={!!session} />
         </header>
 
         <div className="border-t border-border pt-6">
           <MarkdownRenderer content={writeup.content} />
         </div>
-
-        <WriteupActions slug={writeup.id} />
       </article>
     </ErrorBoundary>
   );

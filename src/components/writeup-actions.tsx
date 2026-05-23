@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CATEGORIES, DIFFICULTIES } from "@/lib/utils";
@@ -15,10 +14,10 @@ import {
 
 interface WriteupActionsProps {
   slug: string;
+  isOwner: boolean;
 }
 
-export function WriteupActions({ slug }: WriteupActionsProps) {
-  const { data: session } = useSession();
+export function WriteupActions({ slug, isOwner }: WriteupActionsProps) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -28,13 +27,12 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
   const [ctf, setCtf] = useState("");
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState("");
-  const [tags, setTags] = useState("");
   const [content, setContent] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [loadingEdit, setLoadingEdit] = useState(false);
 
-  if (!session) return null;
+  if (!isOwner) return null;
 
   async function fetchWriteup() {
     setLoadingEdit(true);
@@ -45,8 +43,6 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
     setCtf(data.ctf || "");
     setCategory(data.category || "");
     setDifficulty(data.difficulty || "");
-    const parsedTags: string[] = JSON.parse(data.tags || "[]");
-    setTags(parsedTags.join(", "));
     setContent(data.content || "");
     setLoadingEdit(false);
     setEditing(true);
@@ -64,7 +60,6 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
         ctf,
         category,
         difficulty,
-        tags: tags ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
         content,
       }),
     });
@@ -123,10 +118,6 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">tags (comma-separated)</label>
-            <input value={tags} onChange={(e) => setTags(e.target.value)} className="w-full border border-border bg-card px-2 py-1.5 font-mono text-xs text-foreground outline-none" />
           </div>
         </div>
         <textarea
