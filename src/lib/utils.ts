@@ -37,10 +37,29 @@ export const CATEGORIES = [
 
 export const DIFFICULTIES = ["easy", "medium", "hard", "insane"] as const
 
-export function categoryColor(_category: string): string {
-  return "text-foreground"
+const CATEGORY_COLORS: Record<string, string> = {
+  web: "text-foreground",
+  pwn: "text-foreground",
+  crypto: "text-foreground",
+  rev: "text-foreground",
+  misc: "text-foreground",
+  forensics: "text-foreground",
+  osint: "text-foreground",
+  hardware: "text-foreground",
+  blockchain: "text-foreground",
 }
 
-export function difficultyColor(_difficulty: string): string {
+export function categoryColor(category: string): string {
+  return CATEGORY_COLORS[category] ?? "text-foreground"
+}
+
+export const DIFFICULTY_LABELS: Record<string, string> = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+  insane: "insane",
+}
+
+export function difficultyColor(difficulty: string): string {
   return "text-foreground"
 }

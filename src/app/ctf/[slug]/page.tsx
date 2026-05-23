@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { writeups } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { WriteupCard } from "@/components/writeup-card";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function CtfPage({
 
   return (
     <div>
+      <ScrollToTop />
       <Link
         href="/writeups"
         className="mb-6 inline-block text-xs text-muted-foreground hover:text-primary transition-none"

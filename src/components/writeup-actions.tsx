@@ -32,10 +32,12 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
   const [content, setContent] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [loadingEdit, setLoadingEdit] = useState(false);
 
   if (!session) return null;
 
   async function fetchWriteup() {
+    setLoadingEdit(true);
     const res = await fetch(`/api/writeups/${slug}`);
     const data = await res.json();
     setTitle(data.title || "");
@@ -46,6 +48,7 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
     const parsedTags: string[] = JSON.parse(data.tags || "[]");
     setTags(parsedTags.join(", "));
     setContent(data.content || "");
+    setLoadingEdit(false);
     setEditing(true);
   }
 
@@ -157,9 +160,10 @@ export function WriteupActions({ slug }: WriteupActionsProps) {
     <div className="mt-8 flex items-center gap-3 border-t border-border pt-6 text-xs">
       <button
         onClick={fetchWriteup}
-        className="border border-border bg-card px-3 py-1.5 hover:border-primary transition-none"
+        disabled={loadingEdit}
+        className="border border-border bg-card px-3 py-1.5 hover:border-primary transition-none disabled:opacity-40"
       >
-        [edit]
+        {loadingEdit ? "..." : "[edit]"}
       </button>
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogTrigger

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import { CATEGORIES, DIFFICULTIES } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 1_048_576;
 
+type FieldErrors = Partial<Record<"title" | "challenge" | "ctf" | "category" | "difficulty" | "content", string>>;
+
 export default function SubmitPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -29,36 +31,59 @@ export default function SubmitPage() {
   const [tags, setTags] = useState("");
   const [fileName, setFileName] = useState("");
   const [preview, setPreview] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const submittedBy = session?.user?.name ?? "";
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [dirty, setDirty] = useState(false);
+  const [showExitWarning, setShowExitWarning] = useState(false);
+  const [pendingNav, setPendingNav] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showExitWarning) return;
+    const msg = "You have unsaved changes. Discard them?";
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = msg; };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [showExitWarning]);
+
+  function markDirty() { if (!dirty) setDirty(true); setShowExitWarning(true); }
+
+  function validate(): boolean {
+    const errors: FieldErrors = {};
+    if (!title.trim()) errors.title = "required";
+    if (!challenge.trim()) errors.challenge = "required";
+    if (!ctf.trim()) errors.ctf = "required";
+    if (!category) errors.category = "required";
+    if (!difficulty) errors.difficulty = "required";
+    if (!content.trim()) errors.content = "required";
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     setSubmitting(true);
     setError("");
-
-    if (!title || !challenge || !ctf || !category || !difficulty || !content) {
-      setError("Missing required fields");
-      setSubmitting(false);
-      return;
-    }
 
     try {
       const res = await fetch("/api/writeups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title,
-            challenge,
-            ctf,
-            category,
-            difficulty,
-            content,
-            tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-            submittedBy,
-          }),
+        body: JSON.stringify({
+          title: title.trim(),
+          challenge: challenge.trim(),
+          ctf: ctf.trim(),
+          category,
+          difficulty,
+          content,
+          tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          submittedBy,
+        }),
       });
 
       if (!res.ok) {
@@ -67,14 +92,16 @@ export default function SubmitPage() {
       }
 
       const data = await res.json();
+      setShowExitWarning(false);
       router.push(`/writeups/${data.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit");
       setSubmitting(false);
     }
-  }, [title, challenge, ctf, category, difficulty, content, router]);
+  }, [title, challenge, ctf, category, difficulty, content, tags, submittedBy, router]);
 
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    setError("");
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.name.endsWith(".md")) {
@@ -86,6 +113,8 @@ export default function SubmitPage() {
       return;
     }
     setFileName(file.name);
+    setExpanded(false);
+    markDirty();
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
@@ -94,6 +123,26 @@ export default function SubmitPage() {
       if (titleMatch && !title) setTitle(titleMatch[1].trim());
     };
     reader.readAsText(file);
+  }
+
+  function handleBack() {
+    if (dirty) {
+      setPendingNav("back");
+      setShowExitWarning(true);
+    } else {
+      router.back();
+    }
+  }
+
+  function confirmNav() {
+    setShowExitWarning(false);
+    if (pendingNav === "back") router.back();
+    setPendingNav(null);
+  }
+
+  function cancelNav() {
+    setShowExitWarning(false);
+    setPendingNav(null);
   }
 
   if (status === "loading") {
@@ -127,45 +176,50 @@ export default function SubmitPage() {
     );
   }
 
+  const contentPreview = expanded ? content : content.slice(0, 500);
+
   return (
     <div className="mx-auto max-w-4xl">
       <h1 className="mb-6 border-b border-border pb-2 text-sm font-normal">
         <span className="text-primary">$</span> cat {'>'} writeup.md
       </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">title *</label>
             <Input
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); markDirty(); setFieldErrors((p) => ({ ...p, title: undefined })); }}
               placeholder="Baby SQL Injection"
-              className="border-border bg-card font-mono text-xs"
+              className={`border-border bg-card font-mono text-xs ${fieldErrors.title ? "border-destructive" : ""}`}
             />
+            {fieldErrors.title && <p className="text-xs text-destructive">error: title is required</p>}
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">challenge *</label>
             <Input
               value={challenge}
-              onChange={(e) => setChallenge(e.target.value)}
+              onChange={(e) => { setChallenge(e.target.value); markDirty(); setFieldErrors((p) => ({ ...p, challenge: undefined })); }}
               placeholder="Baby SQL"
-              className="border-border bg-card font-mono text-xs"
+              className={`border-border bg-card font-mono text-xs ${fieldErrors.challenge ? "border-destructive" : ""}`}
             />
+            {fieldErrors.challenge && <p className="text-xs text-destructive">error: challenge is required</p>}
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">ctf event *</label>
             <Input
               value={ctf}
-              onChange={(e) => setCtf(e.target.value)}
+              onChange={(e) => { setCtf(e.target.value); markDirty(); setFieldErrors((p) => ({ ...p, ctf: undefined })); }}
               placeholder="HTB Cyber Apocalypse 2025"
-              className="border-border bg-card font-mono text-xs"
+              className={`border-border bg-card font-mono text-xs ${fieldErrors.ctf ? "border-destructive" : ""}`}
             />
+            {fieldErrors.ctf && <p className="text-xs text-destructive">error: CTF event is required</p>}
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">category *</label>
-            <Select value={category} onValueChange={(v) => v && setCategory(v)}>
-              <SelectTrigger className="border-border bg-card font-mono text-xs">
+            <Select value={category} onValueChange={(v) => { v && setCategory(v); markDirty(); setFieldErrors((p) => ({ ...p, category: undefined })); }}>
+              <SelectTrigger className={`border-border bg-card font-mono text-xs ${fieldErrors.category ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="[select]" />
               </SelectTrigger>
               <SelectContent>
@@ -174,11 +228,12 @@ export default function SubmitPage() {
                 ))}
               </SelectContent>
             </Select>
+            {fieldErrors.category && <p className="text-xs text-destructive">error: category is required</p>}
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">difficulty *</label>
-            <Select value={difficulty} onValueChange={(v) => v && setDifficulty(v)}>
-              <SelectTrigger className="border-border bg-card font-mono text-xs">
+            <Select value={difficulty} onValueChange={(v) => { v && setDifficulty(v); markDirty(); setFieldErrors((p) => ({ ...p, difficulty: undefined })); }}>
+              <SelectTrigger className={`border-border bg-card font-mono text-xs ${fieldErrors.difficulty ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="[select]" />
               </SelectTrigger>
               <SelectContent>
@@ -187,12 +242,13 @@ export default function SubmitPage() {
                 ))}
               </SelectContent>
             </Select>
+            {fieldErrors.difficulty && <p className="text-xs text-destructive">error: difficulty is required</p>}
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">tags (comma-separated)</label>
             <Input
               value={tags}
-              onChange={(e) => setTags(e.target.value)}
+              onChange={(e) => { setTags(e.target.value); markDirty(); }}
               placeholder="sql, injection, web"
               className="border-border bg-card font-mono text-xs"
             />
@@ -225,10 +281,20 @@ export default function SubmitPage() {
               <span className="text-xs text-muted-foreground">{fileName} ({content.length} chars)</span>
             )}
           </div>
+          {fieldErrors.content && <p className="text-xs text-destructive">error: content is required</p>}
           {content && !preview && (
-            <pre className="mt-2 max-h-48 overflow-y-auto border border-border bg-[#050505] p-3 text-xs text-muted-foreground">
-              {content.slice(0, 500)}{content.length > 500 ? "..." : ""}
+            <pre className="mt-2 max-h-96 overflow-y-auto border border-border bg-[#050505] p-3 text-xs text-muted-foreground">
+              {contentPreview}{!expanded && content.length > 500 ? "..." : ""}
             </pre>
+          )}
+          {content && content.length > 500 && !preview && (
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              className="mt-1 text-xs text-muted-foreground hover:text-primary transition-none"
+            >
+              [{expanded ? "collapse" : "show all"}]
+            </button>
           )}
           {content && (
             <button
@@ -254,11 +320,29 @@ export default function SubmitPage() {
           <Button type="submit" disabled={submitting} className="font-mono text-xs">
             {submitting ? "saving..." : "$ ./publish.sh"}
           </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()} className="font-mono text-xs">
+          <Button type="button" variant="outline" onClick={handleBack} className="font-mono text-xs">
             $ ^C
           </Button>
         </div>
       </form>
+
+      {showExitWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="border border-border bg-card p-6 max-w-sm">
+            <p className="mb-4 text-xs text-muted-foreground">
+              Unsaved changes will be lost. Continue?
+            </p>
+            <div className="flex justify-end gap-3 text-xs">
+              <button onClick={cancelNav} className="border border-border bg-card px-3 py-1.5 hover:border-primary transition-none">
+                [cancel]
+              </button>
+              <button onClick={confirmNav} className="border border-destructive bg-card px-3 py-1.5 text-destructive-foreground hover:border-destructive transition-none">
+                [discard]
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

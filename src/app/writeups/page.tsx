@@ -5,6 +5,7 @@ import { writeups } from "@/db/schema";
 import { desc, asc, eq, like, or, and, sql } from "drizzle-orm";
 import { WriteupCard } from "@/components/writeup-card";
 import { FilterBar } from "@/components/filter-bar";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +115,7 @@ export default async function WriteupsPage({
 
   return (
     <div>
+      <ScrollToTop />
       <h1 className="mb-6 border-b border-border pb-2 text-sm font-normal">
         <span className="text-primary">$</span> find /writeups -type f
         <span className="ml-2 text-muted-foreground"># {total} results</span>
