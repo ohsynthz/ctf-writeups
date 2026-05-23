@@ -17,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const writeup = db
+  const writeup = await db
     .select()
     .from(writeups)
     .where(eq(writeups.id, slug))
@@ -37,7 +37,7 @@ export default async function WriteupPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const writeup = db
+  const writeup = await db
     .select()
     .from(writeups)
     .where(eq(writeups.id, slug))

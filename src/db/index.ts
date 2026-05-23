@@ -1,12 +1,10 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
-import path from "path";
-import fs from "fs";
 
-const dbPath = process.env.DATABASE_URL ?? path.join(process.cwd(), "data/local.db");
-fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+const client = createClient({
+  url: process.env.TURSO_DATABASE_URL ?? "http://127.0.0.1:8080",
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-const sqlite = new Database(dbPath);
-
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(client, { schema });
