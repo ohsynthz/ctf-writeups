@@ -44,7 +44,10 @@ export default async function WriteupPage({
 
   if (!writeup) notFound();
 
-  const tags: string[] = JSON.parse(writeup.tags || "[]");
+  let tags: string[] = [];
+  try {
+    tags = JSON.parse(writeup.tags || "[]");
+  } catch {}
 
   return (
     <ErrorBoundary>

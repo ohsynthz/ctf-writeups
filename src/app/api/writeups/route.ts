@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { writeups } from "@/db/schema";
 import { slugify } from "@/lib/utils";
 import { eq, like, or, and, desc, asc, sql } from "drizzle-orm";
+import { auth } from "@/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -11,8 +12,8 @@ export async function GET(request: NextRequest) {
   const ctf = searchParams.get("ctf");
   const search = searchParams.get("search");
   const sort = searchParams.get("sort") ?? "newest";
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
-  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "30")));
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "30", 10)));
 
   const conditions = [];
   if (category && category !== "all") conditions.push(eq(writeups.category, category));
@@ -65,6 +66,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const { title, challenge, ctf, category, tags, difficulty, content, submittedBy } = body;
 

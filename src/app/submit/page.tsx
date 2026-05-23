@@ -26,6 +26,7 @@ export default function SubmitPage() {
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
   const [fileName, setFileName] = useState("");
   const [preview, setPreview] = useState(false);
   const submittedBy = session?.user?.name ?? "";
@@ -55,6 +56,7 @@ export default function SubmitPage() {
             category,
             difficulty,
             content,
+            tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
             submittedBy,
           }),
       });
@@ -185,6 +187,15 @@ export default function SubmitPage() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">tags (comma-separated)</label>
+            <Input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="sql, injection, web"
+              className="border-border bg-card font-mono text-xs"
+            />
           </div>
         </div>
 

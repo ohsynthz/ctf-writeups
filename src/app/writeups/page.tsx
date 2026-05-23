@@ -16,7 +16,7 @@ async function getWriteups(params: Record<string, string>) {
   const ctf = params.ctf;
   const search = params.search;
   const sort = params.sort ?? "newest";
-  const page = Math.max(1, parseInt(params.page ?? "1"));
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
 
   const conditions = [];
   if (category && category !== "all") conditions.push(eq(writeups.category, category));

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { CATEGORIES, DIFFICULTIES } from "@/lib/utils";
 import { Input } from "./ui/input";
 import {
@@ -18,6 +19,14 @@ interface FilterBarProps {
 export function FilterBar({ ctfs }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   function setParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -30,12 +39,20 @@ export function FilterBar({ ctfs }: FilterBarProps) {
     router.push(`/writeups?${params.toString()}`);
   }
 
+  function onSearchChange(value: string) {
+    setSearch(value);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setParam("search", value);
+    }, 300);
+  }
+
   return (
     <div className="flex flex-wrap gap-3">
       <Input
         placeholder="$ grep -i "
-        defaultValue={searchParams.get("search") ?? ""}
-        onChange={(e) => setParam("search", e.target.value)}
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
         className="w-60 border-border bg-card font-mono text-xs"
       />
       <Select

@@ -14,6 +14,11 @@ export const metadata: Metadata = {
       },
     ],
   },
+  alternates: {
+    types: {
+      "application/atom+xml": "/api/feed",
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
