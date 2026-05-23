@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { writeups } from "@/db/schema";
-import { slugify } from "@/lib/utils";
+import { slugify, CATEGORIES, DIFFICULTIES } from "@/lib/utils";
 import { eq, like, or, and, desc, asc, sql } from "drizzle-orm";
 import { auth } from "@/auth";
+import { checkBodySize, checkOrigin, bodyTooLarge, originDenied } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -66,6 +67,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!checkBodySize(request)) return bodyTooLarge();
+  if (!checkOrigin(request)) return originDenied();
+
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -76,6 +80,13 @@ export async function POST(request: NextRequest) {
 
   if (!title || !challenge || !ctf || !category || !difficulty || !content) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+
+  if (!CATEGORIES.includes(category)) {
+    return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+  }
+  if (!DIFFICULTIES.includes(difficulty)) {
+    return NextResponse.json({ error: "Invalid difficulty" }, { status: 400 });
   }
 
   const base = slugify(title);

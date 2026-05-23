@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { writeups } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
+import { CATEGORIES, DIFFICULTIES } from "@/lib/utils";
+import { checkBodySize, checkOrigin, bodyTooLarge, originDenied } from "@/lib/security";
 
 export async function GET(
   _request: Request,
@@ -26,6 +28,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  if (!checkBodySize(request)) return bodyTooLarge();
+  if (!checkOrigin(request)) return originDenied();
+
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,6 +47,13 @@ export async function PUT(
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (body.category && !CATEGORIES.includes(body.category)) {
+    return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+  }
+  if (body.difficulty && !DIFFICULTIES.includes(body.difficulty)) {
+    return NextResponse.json({ error: "Invalid difficulty" }, { status: 400 });
   }
 
   await db
@@ -62,9 +74,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  if (!checkOrigin(request)) return originDenied();
+
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
