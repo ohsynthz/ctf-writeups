@@ -1,54 +1,46 @@
-```
-  ___ _____ ___     _   _ _ _ _   _   _____ _   _ _____ ___  ___  _   _
- / __|_   _| __|   | | | | | | | | | |_   _| | | |_   _/ _ \| _ \| | | |
-| |    | | | _|    | |_| | | | | | |_| | | | | |_| | | | (_) |   /| |_| |
-| |    | | |___|  |  _  |_|_|_|  \___/  |_|  \___/  |_| \___/|_|_\ \___/
-|_|    |_|          |_|
+# CTF Writeups
 
-ohsynthz@root:~/ctf-writeups$
-```
+A personal CTF writeup collection — markdown-based writeups organized by CTF event, challenge, category, and difficulty. Terminal/monochrome aesthetic.
 
-A terminal-themed, monochrome CTF writeup collection. Writeups stored as markdown, browsable like a filesystem.
+## Features
 
-![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=flat-square&logo=next.js)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-gray?style=flat-square&logo=tailwindcss)
-![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-white?style=flat-square&logo=sqlite)
-![Auth](https://img.shields.io/badge/Auth-NextAuth_v5-lightgray?style=flat-square)
+- Browse, search, filter, and sort writeups
+- Per-CTF event pages grouping related challenges
+- Statistics dashboard (categories, difficulties, CTFs)
+- Markdown file upload for submitting writeups
+- Edit and delete existing writeups
+- Atom RSS feed for writeup updates
+- GitHub OAuth (single-user: ohsynthz)
+- Paginated list views
+- Dynamic page titles and metadata
 
----
+## Tech Stack
 
-## $ cat SETUP.md
+- **Next.js 16** (App Router, Turbopack)
+- **Drizzle ORM** + **better-sqlite3** (local SQLite)
+- **NextAuth v5** (GitHub OAuth provider)
+- **shadcn/ui** + **Tailwind CSS v4**
+- **react-markdown** with GFM, syntax highlighting
+
+## Getting Started
 
 ```bash
 npm install
-cp .env.example .env.local    # add GitHub OAuth credentials
-npm run dev                    # starts on http://localhost:3000
+cp .env.example .env.local
+# Fill in AUTH_GITHUB_ID and AUTH_GITHUB_SECRET
+npm run dev
 ```
 
-## $ ls stack/
+Open [http://localhost:3000](http://localhost:3000).
 
-| Component | Choice |
-|-----------|--------|
-| Framework | Next.js 16 (App Router) |
-| Database | SQLite via better-sqlite3 + Drizzle ORM |
-| Auth | NextAuth v5 (GitHub provider, single-user) |
-| UI | shadcn/ui + Tailwind CSS v4 |
-| Styling | Monochrome terminal theme |
-
-## $ find routes -type f
+## Routes
 
 | Route | Description |
 |-------|-------------|
-| `/` | Landing — hero + recent writeups |
-| `/writeups` | Searchable, filterable, paginated, sortable |
-| `/writeups/[slug]` | Writeup detail with edit/delete |
-| `/ctf/[slug]` | Challenges grouped by CTF event |
-| `/stats` | Statistics dashboard |
-| `/submit` | Upload new writeup (auth: ohsynthz only) |
+| `/` | Landing — hero with recent writeups |
+| `/writeups` | Search, filter, sort, paginate |
+| `/writeups/[slug]` | Writeup detail + edit/delete |
+| `/ctf/[slug]` | Writeups by CTF event |
+| `/stats` | Category/difficulty/CTF breakdowns |
+| `/submit` | Upload markdown (auth required) |
 | `/api/feed` | Atom RSS feed |
-
----
-
-```
-ohsynthz@root:~/ctf-writeups$ _
-```
