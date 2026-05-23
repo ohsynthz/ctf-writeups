@@ -3,10 +3,12 @@ import { db } from "@/db";
 import { writeups } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { WriteupCard } from "@/components/writeup-card";
+import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const session = await auth();
   const recent = await db
     .select({
       id: writeups.id,
@@ -50,9 +52,11 @@ export default async function HomePage() {
         {recent.length === 0 ? (
           <div className="border border-border bg-card p-8 text-center">
             <p className="mb-2 text-sm text-muted-foreground">No writeups yet</p>
-            <Link href="/submit" className="text-xs text-primary hover:underline">
-              $ touch first-writeup.md
-            </Link>
+            {session && (
+              <Link href="/submit" className="text-xs text-primary hover:underline">
+                $ touch first-writeup.md
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
