@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { AuthButton } from "./auth-button";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <nav className="border-b border-border">
@@ -32,9 +34,11 @@ export function Navbar() {
           <Link href="/stats" className="hover:text-primary transition-none">
             stats/
           </Link>
-          <Link href="/submit" className="hover:text-primary transition-none">
-            submit/
-          </Link>
+          {session && (
+            <Link href="/submit" className="hover:text-primary transition-none">
+              submit/
+            </Link>
+          )}
           <AuthButton />
         </div>
       </div>
@@ -47,9 +51,11 @@ export function Navbar() {
           <Link href="/stats" className="py-1 hover:text-primary transition-none" onClick={() => setOpen(false)}>
             stats/
           </Link>
-          <Link href="/submit" className="py-1 hover:text-primary transition-none" onClick={() => setOpen(false)}>
-            submit/
-          </Link>
+          {session && (
+            <Link href="/submit" className="py-1 hover:text-primary transition-none" onClick={() => setOpen(false)}>
+              submit/
+            </Link>
+          )}
           <div className="py-1">
             <AuthButton />
           </div>
