@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { title, challenge, ctf, category, tags, difficulty, content, submittedBy } = body;
+  const { title, challenge, ctf, category, difficulty, content, submittedBy } = body;
 
   if (!title || !challenge || !ctf || !category || !difficulty || !content) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     challenge,
     ctf,
     category,
-    tags: JSON.stringify(tags ?? []),
+    tags: "[]",
     difficulty,
     content,
     submittedBy: submittedBy || null,
