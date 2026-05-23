@@ -53,14 +53,14 @@ export function FilterBar({ ctfs }: FilterBarProps) {
         placeholder="$ grep -i "
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="w-60 border-border bg-card font-mono text-xs"
+        className="w-full sm:w-60 border-border bg-card font-mono text-xs"
       />
       <Select
         key={`cat-${searchParams.get("category") ?? ""}`}
         defaultValue={searchParams.get("category") ?? ""}
         onValueChange={(v) => v && setParam("category", v === "all" ? "" : v)}
       >
-        <SelectTrigger className="w-36 border-border bg-card text-xs">
+        <SelectTrigger className="w-full sm:w-36 border-border bg-card text-xs">
           <SelectValue placeholder="[category]" />
         </SelectTrigger>
         <SelectContent>
@@ -75,7 +75,7 @@ export function FilterBar({ ctfs }: FilterBarProps) {
         defaultValue={searchParams.get("difficulty") ?? ""}
         onValueChange={(v) => v && setParam("difficulty", v === "all" ? "" : v)}
       >
-        <SelectTrigger className="w-36 border-border bg-card text-xs">
+        <SelectTrigger className="w-full sm:w-36 border-border bg-card text-xs">
           <SelectValue placeholder="[difficulty]" />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ export function FilterBar({ ctfs }: FilterBarProps) {
         defaultValue={searchParams.get("ctf") ?? ""}
         onValueChange={(v) => v && setParam("ctf", v === "all" ? "" : v)}
       >
-        <SelectTrigger className="w-48 border-border bg-card text-xs">
+        <SelectTrigger className="w-full sm:w-48 border-border bg-card text-xs">
           <SelectValue placeholder="[ctf]" />
         </SelectTrigger>
         <SelectContent>
@@ -105,7 +105,7 @@ export function FilterBar({ ctfs }: FilterBarProps) {
         defaultValue={searchParams.get("sort") ?? "newest"}
         onValueChange={(v) => v && setParam("sort", v === "newest" ? "" : v)}
       >
-        <SelectTrigger className="w-36 border-border bg-card text-xs">
+        <SelectTrigger className="w-full sm:w-36 border-border bg-card text-xs">
           <SelectValue placeholder="[sort]" />
         </SelectTrigger>
         <SelectContent>

@@ -54,6 +54,7 @@
 
 * {
   border-color: var(--color-border);
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -117,6 +118,16 @@ input, textarea, select {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(0 0% 30%);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  display: block;
+  overflow-x: auto;
 }
 
 .prose {

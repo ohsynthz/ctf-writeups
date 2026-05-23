@@ -62,7 +62,7 @@ export default async function WriteupPage({
           $ cd .. &amp;&amp; ls
         </Link>
 
-        <header className="mb-8 border border-border bg-card p-5">
+        <header className="mb-8 border border-border bg-card p-4 sm:p-5">
           <div className="mb-3 flex items-center gap-2 text-xs">
             <span className={categoryColor(writeup.category)}>
               [{writeup.category}]

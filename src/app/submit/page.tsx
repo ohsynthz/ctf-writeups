@@ -237,7 +237,7 @@ export default function SubmitPage() {
           </div>
           {fieldErrors.content && <p className="text-xs text-destructive">error: content is required</p>}
           {content && !preview && (
-            <pre className="mt-2 max-h-96 overflow-y-auto border border-border bg-[#050505] p-3 text-xs text-muted-foreground">
+            <pre className="mt-2 max-h-96 overflow-x-auto overflow-y-auto border border-border bg-[#050505] p-3 text-xs text-muted-foreground">
               {contentPreview}{!expanded && content.length > 500 ? "..." : ""}
             </pre>
           )}

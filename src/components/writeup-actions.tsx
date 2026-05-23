@@ -128,7 +128,7 @@ export function WriteupActions({ slug, isOwner }: WriteupActionsProps) {
         {message && (
           <p className="mb-2 text-xs text-muted-foreground">{message}</p>
         )}
-        <div className="flex gap-3 text-xs">
+        <div className="flex flex-wrap gap-3 text-xs">
           <button
             onClick={handleSave}
             disabled={saving}

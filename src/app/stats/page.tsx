@@ -83,18 +83,20 @@ export default async function StatsPage() {
         {categoryRows.length === 0 ? (
           <p className="text-xs text-muted-foreground">no categories yet</p>
         ) : (
-          <div className="space-y-2">
-            {categoryRows.map(({ category, count }) => (
-              <Link
-                key={category}
-                href={`/writeups?category=${category}`}
-                className="flex items-center gap-3 hover:opacity-80 transition-none"
-              >
-                <span className="w-20 shrink-0 text-right text-xs text-muted-foreground">[{category}]</span>
-                <span className="text-xs text-foreground">{asciiBar(count, maxCat)}</span>
-                <span className="w-8 shrink-0 text-xs text-muted-foreground">{count}</span>
-              </Link>
-            ))}
+          <div className="overflow-x-auto">
+            <div className="min-w-max space-y-2">
+              {categoryRows.map(({ category, count }) => (
+                <Link
+                  key={category}
+                  href={`/writeups?category=${category}`}
+                  className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-none"
+                >
+                  <span className="w-14 shrink-0 text-right text-xs text-muted-foreground sm:w-20">[{category}]</span>
+                  <span className="whitespace-nowrap text-xs text-foreground">{asciiBar(count, maxCat)}</span>
+                  <span className="w-6 shrink-0 text-xs text-muted-foreground sm:w-8">{count}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -104,14 +106,16 @@ export default async function StatsPage() {
         {difficultyRows.length === 0 ? (
           <p className="text-xs text-muted-foreground">no difficulties yet</p>
         ) : (
-          <div className="space-y-2">
-            {difficultyRows.map(({ difficulty, count }) => (
-              <div key={difficulty} className="flex items-center gap-3">
-                <span className="w-20 shrink-0 text-right text-xs text-muted-foreground">[{difficulty}]</span>
-                <span className="text-xs text-foreground">{asciiBar(count, maxDiff)}</span>
-                <span className="w-8 shrink-0 text-xs text-muted-foreground">{count}</span>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <div className="min-w-max space-y-2">
+              {difficultyRows.map(({ difficulty, count }) => (
+                <div key={difficulty} className="flex items-center gap-2 sm:gap-3">
+                  <span className="w-14 shrink-0 text-right text-xs text-muted-foreground sm:w-20">[{difficulty}]</span>
+                  <span className="whitespace-nowrap text-xs text-foreground">{asciiBar(count, maxDiff)}</span>
+                  <span className="w-6 shrink-0 text-xs text-muted-foreground sm:w-8">{count}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

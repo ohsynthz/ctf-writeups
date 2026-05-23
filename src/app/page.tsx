@@ -25,7 +25,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="mb-12 border border-border bg-card p-6">
+      <section className="mb-12 border border-border bg-card p-4 sm:p-6">
         <p className="mb-2 text-xs text-muted-foreground">
           <span className="text-primary">$</span> cat writeups/README
         </p>
