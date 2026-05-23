@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/db";
 import { writeups } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { like, desc, sql } from "drizzle-orm";
 import { WriteupCard } from "@/components/writeup-card";
 import { ScrollToTop } from "@/components/scroll-to-top";
 
@@ -15,7 +15,7 @@ async function getWriteups(slug: string, page: number) {
   const countResult = await db
     .select({ count: sql<number>`count(*)` })
     .from(writeups)
-    .where(eq(writeups.ctf, ctf));
+    .where(like(writeups.ctf, ctf));
   const total = countResult[0]?.count ?? 0;
 
   const list = await db
@@ -31,7 +31,7 @@ async function getWriteups(slug: string, page: number) {
       createdAt: writeups.createdAt,
     })
     .from(writeups)
-    .where(eq(writeups.ctf, ctf))
+    .where(like(writeups.ctf, ctf))
     .orderBy(desc(writeups.createdAt))
     .limit(LIMIT)
     .offset((page - 1) * LIMIT);
